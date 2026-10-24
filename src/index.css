@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Rajdhani', 'Noto Sans Gujarati', 'Noto Sans Devanagari', sans-serif;
+    background-color: #030712;
+    color: #e0f2fe;
+  }
+
+  h1, h2, h3, .font-hud {
+    font-family: 'Orbitron', sans-serif;
+  }
+
+  .font-mono-hud {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+/* Custom glow and HUD utilities */
+.glow-cyan-sm {
+  box-shadow: 0 0 15px rgba(6, 182, 212, 0.4);
+}
+
+.glow-cyan-md {
+  box-shadow: 0 0 30px rgba(6, 182, 212, 0.6), inset 0 0 15px rgba(6, 182, 212, 0.3);
+}
+
+.glow-cyan-lg {
+  box-shadow: 0 0 50px rgba(6, 182, 212, 0.8), inset 0 0 25px rgba(6, 182, 212, 0.5);
+}
+
+.glow-text-cyan {
+  text-shadow: 0 0 10px rgba(6, 182, 212, 0.8), 0 0 20px rgba(6, 182, 212, 0.4);
+}
+
+.glow-text-cyan-strong {
+  text-shadow: 0 0 8px #00f0ff, 0 0 20px rgba(0, 240, 255, 0.8), 0 0 40px rgba(0, 240, 255, 0.4);
+}
+
+/* Subtle scanlines effect */
+.scanlines {
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%, 
+    rgba(0, 0, 0, 0.25) 50%
+  ), linear-gradient(
+    90deg,
+    rgba(255, 0, 0, 0.03),
+    rgba(0, 255, 0, 0.01),
+    rgba(0, 0, 255, 0.03)
+  );
+  background-size: 100% 3px, 3px 100%;
+}
+
+/* Custom sleek scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(3, 7, 18, 0.8);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(6, 182, 212, 0.3);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(6, 182, 212, 0.7);
+}

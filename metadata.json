@@ -1,0 +1,6 @@
+{
+  "name": "JARVIS Voice Assistant",
+  "description": "Personal AI voice assistant for Android supporting Gujarati, Hindi, and English voice commands, spoken audio replies, futuristic HUD interface, and app shortcuts.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
