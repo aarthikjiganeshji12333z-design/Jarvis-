@@ -582,18 +582,42 @@ export function CustomVoiceModal({
 
                 <div className="space-y-2 pt-1 font-mono-hud text-xs">
                   {/* Gemini TTS Engine */}
-                  <div className="p-2.5 rounded-lg bg-slate-950 border border-emerald-500/40 flex items-start justify-between">
+                  <div
+                    className={`p-2.5 rounded-lg bg-slate-950 border flex items-start justify-between ${
+                      engineStatus?.geminiTts.quotaExceeded
+                        ? 'border-amber-500/40'
+                        : 'border-emerald-500/40'
+                    }`}
+                  >
                     <div>
-                      <div className="text-emerald-300 font-bold flex items-center gap-1.5">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                        <span>Gemini Neural Voice (gemini-3.8-flash-tts)</span>
+                      <div
+                        className={`font-bold flex items-center gap-1.5 ${
+                          engineStatus?.geminiTts.quotaExceeded
+                            ? 'text-amber-300'
+                            : 'text-emerald-300'
+                        }`}
+                      >
+                        {engineStatus?.geminiTts.quotaExceeded ? (
+                          <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+                        ) : (
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                        )}
+                        <span>Gemini Neural Voice ({engineStatus?.geminiTts.model || 'gemini-3.8-flash-tts'})</span>
                       </div>
                       <div className="text-[10px] text-cyan-200/80 font-sans mt-0.5">
-                        ગુજરાતી ભાષા, પર્સોના કન્ડીશનીંગ અને હાઇ-ક્વોલિટી ઓડિયો આઉટપુટ સાથે સક્રિય છે.
+                        {engineStatus?.geminiTts.quotaExceeded
+                          ? 'Gemini TTS દૈનિક ફ્રી ક્વોટા મર્યાદા પૂર્ણ થઈ છે. ઍપ આપમેળે કસ્ટમ ટ્યુન કરેલ ક્લાયન્ટ સ્પીચ સિન્થેસિસ દ્વારા બોલવાનું ચાલુ રાખે છે.'
+                          : 'ગુજરાતી ભાષા, પર્સોના કન્ડીશનીંગ અને હાઇ-ક્વોલિટી ઓડિયો આઉટપુટ સાથે સક્રિય છે.'}
                       </div>
                     </div>
-                    <span className="text-[9px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold shrink-0">
-                      ACTIVE
+                    <span
+                      className={`text-[9px] px-2 py-0.5 rounded font-bold shrink-0 ${
+                        engineStatus?.geminiTts.quotaExceeded
+                          ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                          : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                      }`}
+                    >
+                      {engineStatus?.geminiTts.quotaExceeded ? 'QUOTA LIMIT' : 'ACTIVE'}
                     </span>
                   </div>
 

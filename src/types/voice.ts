@@ -22,6 +22,7 @@ export interface VoiceEngineStatus {
     available: boolean;
     model: string;
     message: string;
+    quotaExceeded?: boolean;
   };
   elevenlabsClone: {
     available: boolean;

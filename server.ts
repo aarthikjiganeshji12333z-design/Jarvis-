@@ -434,18 +434,26 @@ app.post('/api/chat', async (req: Request, res: Response) => {
   }
 });
 
+// Track Gemini TTS quota exhaustion cooldown to prevent spamming the API once 429 is returned
+let geminiTtsQuotaBlockedUntil = 0;
+let geminiTtsQuotaMessage = '';
+
 // GET /api/voice-engine/status - Diagnostics on available voice synthesis engines (Requirement 8)
 app.get('/api/voice-engine/status', (_req: Request, res: Response) => {
   const hasGeminiKey = Boolean(process.env.GEMINI_API_KEY);
   const hasElevenlabsKey = Boolean(process.env.ELEVENLABS_API_KEY);
+  const isTtsQuotaBlocked = Date.now() < geminiTtsQuotaBlockedUntil;
 
   res.json({
     geminiTts: {
-      available: hasGeminiKey,
+      available: hasGeminiKey && !isTtsQuotaBlocked,
       model: 'gemini-3.8-flash-tts',
-      message: hasGeminiKey
-        ? 'Gemini Neural Voice Engine ready with full Gujarati & English speech synthesis.'
-        : 'GEMINI_API_KEY not configured.',
+      quotaExceeded: isTtsQuotaBlocked,
+      message: isTtsQuotaBlocked
+        ? geminiTtsQuotaMessage
+        : (hasGeminiKey
+            ? 'Gemini Neural Voice Engine ready with full Gujarati & English speech synthesis.'
+            : 'GEMINI_API_KEY not configured.'),
     },
     elevenlabsClone: {
       available: hasElevenlabsKey,
@@ -528,6 +536,16 @@ app.post('/api/tts', async (req: Request, res: Response) => {
     }
 
     // 3. Gemini Neural Voice with Custom Persona Conditioning (gemini-3.8-flash-tts)
+    // Check if Gemini TTS quota is currently exhausted
+    if (Date.now() < geminiTtsQuotaBlockedUntil) {
+      return res.json({
+        fallback: true,
+        provider: 'browser_speech',
+        quotaExceeded: true,
+        message: geminiTtsQuotaMessage,
+      });
+    }
+
     // Purge old King voice ('Fenrir' / 'king-deep-stark') and enforce Standard recording 4 reference profile
     const selectedVoiceName =
       customVoiceConfig?.prebuiltVoice === 'Fenrir'
@@ -574,8 +592,23 @@ app.post('/api/tts', async (req: Request, res: Response) => {
         base64Audio = ttsResponse.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
         if (base64Audio) break;
       } catch (err: any) {
-        // Log clean diagnostic details if permission or quota issues occur
-        console.log(`[api/tts] Model ${ttsModel} notice:`, err?.message || err);
+        const errStr = String(err?.message || err);
+        const isQuota =
+          errStr.includes('429') ||
+          errStr.includes('RESOURCE_EXHAUSTED') ||
+          errStr.includes('quota') ||
+          err?.status === 429;
+
+        if (isQuota) {
+          // Free tier daily quota exceeded (10 requests/day). Block calls for 5 hours to avoid spamming the API.
+          geminiTtsQuotaBlockedUntil = Date.now() + 5 * 60 * 60 * 1000;
+          geminiTtsQuotaMessage =
+            'Gemini TTS daily quota limit reached on Free Tier (10 requests/day). Execution safely routed to tuned browser speech synthesis without repeated failed retries.';
+          console.log('[api/tts] Quota limit reached on Free Tier. Seamlessly routing speech synthesis to browser speech synthesis.');
+          break; // Stop querying other TTS models when quota is exhausted
+        } else {
+          console.log(`[api/tts] Model ${ttsModel} notice:`, errStr.slice(0, 160));
+        }
       }
     }
 
